@@ -197,6 +197,29 @@ impl InnerWatcher {
                 )
                 .input;
 
+            if input.len() < 260 {
+                tracing::warn!(
+                    "invalid L1 attributes deposited transaction in block {}",
+                    block.number.unwrap()
+                );
+                // It's okay to return early here with the default system config
+                // because we will update it later when processing the first L1 block.
+                );
+                return Self {
+                    config,
+                    provider,
+                    blob_fetcher,
+                    block_update_sender,
+                    current_block: l1_start_block,
+                    head_block: 0,
+                    finalized_block: 0,
+                    unfinalized_blocks: Vec::new(),
+                    deposits: HashMap::new(),
+                    system_config: config.chain.system_config,
+                    system_config_update: (l1_start_block, None),
+                };
+            }
+
             let batch_sender = Address::from_slice(&input[176..196]);
             let l1_fee_overhead = alloy_primitives::U256::from_be_slice(&input[196..228]);
             let l1_fee_scalar = alloy_primitives::U256::from_be_slice(&input[228..260]);
