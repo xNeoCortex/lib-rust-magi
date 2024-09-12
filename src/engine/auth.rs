@@ -10,8 +10,9 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-/// JWT hex encoded 256 bit secret key length.
-const JWT_SECRET_LEN: usize = 64;
+/// JWT hex encoded secret key lengths.
+const JWT_SECRET_LEN_32: usize = 64;
+const JWT_SECRET_LEN_48: usize = 96;
 
 /// The maximum amount of drift from the JWT claims issued-at `iat` time.
 const JWT_MAX_IAT_DIFF: Duration = Duration::from_secs(60);
@@ -27,18 +28,19 @@ pub struct JwtSecret([u8; 32]);
 
 impl JwtSecret {
     /// Creates an instance of JwtSecret.
-    /// The provided `secret` must be a valid hexadecimal string of length 64.
+    /// The provided `secret` must be a valid hexadecimal string of length 64 or 96.
     pub fn from_hex<S: AsRef<str>>(hex: S) -> Result<Self> {
         let hex: &str = hex.as_ref().trim();
         // Remove the "0x" or "0X" prefix if it exists
         let hex = hex
             .strip_prefix("0x")
             .or_else(|| hex.strip_prefix("0X"))
-            .unwrap_or(hex);
-        if hex.len() != JWT_SECRET_LEN {
+            .unwrap_or(hex)
+            .to_lowercase();
+        if hex.len() != JWT_SECRET_LEN_32 && hex.len() != JWT_SECRET_LEN_48 {
             Err(eyre::eyre!(
                 "Invalid JWT secret key length. Expected {} characters, got {}.",
-                JWT_SECRET_LEN,
+                JWT_SECRET_LEN_32,
                 hex.len()
             ))
         } else {
