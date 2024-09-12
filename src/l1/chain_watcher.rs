@@ -197,7 +197,15 @@ impl InnerWatcher {
                 )
                 .input;
 
-            if input.len() >= 196 {
+            if input.len() < 260 {
+                tracing::warn!(
+                    "skipping block {} because input len {} < 260",
+                    block.number,
+                    input.len()
+                );
+                return Self::new(config, block_update_sender, l1_start_block, l2_start_block)
+                    .await;
+            } else {
                 let batch_sender = Address::from_slice(&input[176..196]);
                 let l1_fee_overhead = alloy_primitives::U256::from_be_slice(&input[196..228]);
                 let l1_fee_scalar = alloy_primitives::U256::from_be_slice(&input[228..260]);
