@@ -197,20 +197,22 @@ impl InnerWatcher {
                 )
                 .input;
 
-            let batch_sender = Address::from_slice(&input[176..196]);
-            let l1_fee_overhead = alloy_primitives::U256::from_be_slice(&input[196..228]);
-            let l1_fee_scalar = alloy_primitives::U256::from_be_slice(&input[228..260]);
-            let mut gas_limit: [u8; 32] = [0; 32];
-            block.gas_limit.to_big_endian(&mut gas_limit);
-            let gas_limit = alloy_primitives::U256::from_be_slice(&gas_limit);
+            if input.len() >= 196 {
+                let batch_sender = Address::from_slice(&input[176..196]);
+                let l1_fee_overhead = alloy_primitives::U256::from_be_slice(&input[196..228]);
+                let l1_fee_scalar = alloy_primitives::U256::from_be_slice(&input[228..260]);
+                let mut gas_limit: [u8; 32] = [0; 32];
+                block.gas_limit.to_big_endian(&mut gas_limit);
+                let gas_limit = alloy_primitives::U256::from_be_slice(&gas_limit);
 
-            SystemConfig {
-                batch_sender: alloy_primitives::Address::from_slice(batch_sender.as_bytes()),
-                l1_fee_overhead,
-                l1_fee_scalar,
-                gas_limit,
-                // TODO: fetch from contract
-                unsafe_block_signer: config.chain.system_config.unsafe_block_signer,
+                SystemConfig {
+                    batch_sender: alloy_primitives::Address::from_slice(batch_sender.as_bytes()),
+                    l1_fee_overhead,
+                    l1_fee_scalar,
+                    gas_limit,
+                    // TODO: fetch from contract
+                    unsafe_block_signer: config.chain.system_config.unsafe_block_signer,
+                }
             }
         };
 
