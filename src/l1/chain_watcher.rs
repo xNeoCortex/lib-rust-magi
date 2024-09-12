@@ -202,6 +202,9 @@ impl InnerWatcher {
                     "invalid L1 attributes deposited transaction in block {}",
                     block.number.unwrap()
                 );
+                // It's okay to return early here with the default system config
+                // because we will update it later when processing the first L1 block.
+                );
                 return Self {
                     config,
                     provider,
